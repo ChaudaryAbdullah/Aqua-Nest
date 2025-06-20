@@ -1,12 +1,22 @@
-import React, { useState, useEffect } from "react";
+import React, { useState, useEffect, useRef } from "react";
 import { Link, useLocation } from "react-router-dom";
+import { useNavigate } from "react-router-dom";
 import { motion, AnimatePresence } from "framer-motion";
 import { Menu, X, Droplets, Phone } from "lucide-react";
 
 const Navbar = () => {
+  const navigate = useNavigate();
+  const [isDropdownOpen, setIsDropdownOpen] = useState(false);
+  const [isLoggedIn, setIsLoggedIn] = useState(false);
+  const dropdownRef = useRef<HTMLDivElement>(null);
   const [isOpen, setIsOpen] = useState(false);
   const [isScrolled, setIsScrolled] = useState(false);
   const location = useLocation();
+
+  useEffect(() => {
+    const username = localStorage.getItem("data");
+    setIsLoggedIn(!!username);
+  }, [location]);
 
   useEffect(() => {
     const handleScroll = () => {
@@ -15,6 +25,26 @@ const Navbar = () => {
     window.addEventListener("scroll", handleScroll);
     return () => window.removeEventListener("scroll", handleScroll);
   }, []);
+
+  const handleProfileClick = () => {
+    if (!isLoggedIn) {
+      navigate("/login");
+    } else {
+      setIsDropdownOpen((prev) => !prev);
+    }
+  };
+
+  const handleSignOut = () => {
+    localStorage.removeItem("data");
+    setIsLoggedIn(false);
+    setIsDropdownOpen(false);
+    navigate("/");
+  };
+
+  const handleViewHistory = () => {
+    navigate("/history");
+    setIsDropdownOpen(false);
+  };
 
   const navLinks = [
     { name: "Home", path: "/" },
@@ -116,7 +146,35 @@ const Navbar = () => {
               1-800-AQUA
             </span>
           </motion.div>
+          <div className="relative" ref={dropdownRef}>
+            <button
+              onClick={handleProfileClick}
+              className={
+                isScrolled
+                  ? "bg-blue-600  text-white/95 px-4 py-2 rounded-md hover:bg-blue-700 transition"
+                  : "bg-white text-blue-600 px-4 py-2 rounded-md hover:bg-white/80 transition"
+              }
+            >
+              Profile
+            </button>
 
+            {isDropdownOpen && (
+              <div className="absolute right-0 mt-2 w-40 bg-white border rounded-md shadow-md z-50">
+                <button
+                  onClick={handleViewHistory}
+                  className="block w-full px-4 py-2 text-left hover:bg-gray-100"
+                >
+                  View History
+                </button>
+                <button
+                  onClick={handleSignOut}
+                  className="block w-full px-4 py-2 text-left hover:bg-gray-100 text-red-500"
+                >
+                  Sign Out
+                </button>
+              </div>
+            )}
+          </div>
           <motion.button
             onClick={() => setIsOpen(!isOpen)}
             className={`md:hidden p-2 rounded-md ${

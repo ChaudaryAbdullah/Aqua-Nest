@@ -13,6 +13,8 @@ import About from "./pages/About";
 import Products from "./pages/Products";
 import Testimonials from "./pages/Testimonials";
 import Contact from "./pages/Contact";
+import LoginForm from "./pages/Login";
+import SignUp from "./pages/SignUp";
 
 const AnimatedRoutes = () => {
   const location = useLocation();
@@ -25,6 +27,8 @@ const AnimatedRoutes = () => {
         <Route path="/products" element={<Products />} />
         <Route path="/testimonials" element={<Testimonials />} />
         <Route path="/contact" element={<Contact />} />
+        <Route path="/login" element={<LoginForm />} />
+        <Route path="/signup" element={<SignUp />} />
       </Routes>
     </AnimatePresence>
   );
