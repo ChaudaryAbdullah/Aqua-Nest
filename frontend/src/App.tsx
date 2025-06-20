@@ -12,6 +12,7 @@ import Home from "./pages/Home";
 import About from "./pages/About";
 import Products from "./pages/Products";
 import Testimonials from "./pages/Testimonials";
+import Contact from "./pages/Contact";
 
 const AnimatedRoutes = () => {
   const location = useLocation();
@@ -23,6 +24,7 @@ const AnimatedRoutes = () => {
         <Route path="/about" element={<About />} />
         <Route path="/products" element={<Products />} />
         <Route path="/testimonials" element={<Testimonials />} />
+        <Route path="/contact" element={<Contact />} />
       </Routes>
     </AnimatePresence>
   );
