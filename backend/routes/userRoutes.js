@@ -12,7 +12,6 @@ router.post("/", async (req, res) => {
       !req.body.dob ||
       !req.body.email ||
       !req.body.password
-      //   !req.body.isAdmin
     ) {
       return res.status(400).send({ message: "Please fill all the fields" });
     }

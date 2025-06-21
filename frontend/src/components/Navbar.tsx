@@ -1,17 +1,17 @@
 import React, { useState, useEffect, useRef } from "react";
-import { Link, useLocation } from "react-router-dom";
-import { useNavigate } from "react-router-dom";
+import { Link, useLocation, useNavigate } from "react-router-dom";
 import { motion, AnimatePresence } from "framer-motion";
 import { Menu, X, Droplets, Phone } from "lucide-react";
 
 const Navbar = () => {
   const navigate = useNavigate();
-  const [isDropdownOpen, setIsDropdownOpen] = useState(false);
-  const [isLoggedIn, setIsLoggedIn] = useState(false);
-  const dropdownRef = useRef<HTMLDivElement>(null);
-  const [isOpen, setIsOpen] = useState(false);
-  const [isScrolled, setIsScrolled] = useState(false);
   const location = useLocation();
+  const dropdownRef = useRef<HTMLDivElement>(null);
+
+  const [isOpen, setIsOpen] = useState(false);
+  const [isDropdownOpen, setIsDropdownOpen] = useState(false);
+  const [isScrolled, setIsScrolled] = useState(false);
+  const [isLoggedIn, setIsLoggedIn] = useState(false);
 
   useEffect(() => {
     const username = localStorage.getItem("data");
@@ -59,7 +59,7 @@ const Navbar = () => {
       className={`fixed w-full z-50 transition-all duration-500 ${
         isScrolled
           ? "bg-white/95 backdrop-blur-md shadow-lg py-4"
-          : "bg-transparent py-6"
+          : "bg-transparent backdrop-blur-md py-6"
       }`}
       initial={{ y: -100 }}
       animate={{ y: 0 }}
@@ -89,6 +89,7 @@ const Navbar = () => {
             </Link>
           </motion.div>
 
+          {/* Desktop Links */}
           <div className="hidden md:flex items-center space-x-8">
             {navLinks.map((link, index) => (
               <motion.div
@@ -126,6 +127,7 @@ const Navbar = () => {
             ))}
           </div>
 
+          {/* Desktop Contact Info */}
           <motion.div
             className="hidden md:flex items-center space-x-4"
             initial={{ opacity: 0, x: 20 }}
@@ -146,18 +148,19 @@ const Navbar = () => {
               1-800-AQUA
             </span>
           </motion.div>
-          <div className="relative" ref={dropdownRef}>
+
+          {/* Profile Button - Desktop */}
+          <div className="hidden md:block relative" ref={dropdownRef}>
             <button
               onClick={handleProfileClick}
               className={
                 isScrolled
-                  ? "bg-blue-600  text-white/95 px-4 py-2 rounded-md hover:bg-blue-700 transition"
+                  ? "bg-blue-600 text-white px-4 py-2 rounded-md hover:bg-blue-700 transition"
                   : "bg-white text-blue-600 px-4 py-2 rounded-md hover:bg-white/80 transition"
               }
             >
               Profile
             </button>
-
             {isDropdownOpen && (
               <div className="absolute right-0 mt-2 w-40 bg-white border rounded-md shadow-md z-50">
                 <button
@@ -175,6 +178,8 @@ const Navbar = () => {
               </div>
             )}
           </div>
+
+          {/* Hamburger Icon */}
           <motion.button
             onClick={() => setIsOpen(!isOpen)}
             className={`md:hidden p-2 rounded-md ${
@@ -208,6 +213,7 @@ const Navbar = () => {
           </motion.button>
         </div>
 
+        {/* Mobile Nav Panel */}
         <AnimatePresence>
           {isOpen && (
             <motion.div
@@ -237,6 +243,32 @@ const Navbar = () => {
                   </Link>
                 </motion.div>
               ))}
+
+              {/* Mobile Profile */}
+              <div className="mt-4 px-4">
+                <button
+                  onClick={handleProfileClick}
+                  className="w-full bg-blue-600 text-white px-4 py-2 rounded-md hover:bg-blue-700 transition"
+                >
+                  Profile
+                </button>
+                {isDropdownOpen && (
+                  <div className="mt-2 w-full bg-white border rounded-md shadow-md">
+                    <button
+                      onClick={handleViewHistory}
+                      className="block w-full px-4 py-2 text-left hover:bg-gray-100"
+                    >
+                      View History
+                    </button>
+                    <button
+                      onClick={handleSignOut}
+                      className="block w-full px-4 py-2 text-left hover:bg-gray-100 text-red-500"
+                    >
+                      Sign Out
+                    </button>
+                  </div>
+                )}
+              </div>
             </motion.div>
           )}
         </AnimatePresence>

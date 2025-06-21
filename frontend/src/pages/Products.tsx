@@ -1,91 +1,44 @@
-import React, { useState } from "react";
+import React, { useEffect, useState } from "react";
 import { motion, AnimatePresence } from "framer-motion";
 import { Filter, Star, ShoppingCart, Droplets, Search } from "lucide-react";
+import axios from "axios";
+import { BACK_END_LINK } from "../config";
+
+type Product = {
+  _id: string;
+  name: string;
+  description: string;
+  price: number;
+  ratings: number;
+  reviews: number;
+  imageUrl: string;
+  category: string;
+  size: string;
+  stock: number;
+};
 
 const Products = () => {
   const [selectedType, setSelectedType] = useState("all");
   const [selectedSize, setSelectedSize] = useState("all");
   const [sortBy, setSortBy] = useState("name");
   const [searchTerm, setSearchTerm] = useState("");
+  const [products, setProducts] = useState<Product[]>([]);
 
-  const products = [
-    {
-      id: 1,
-      name: "AquaNest Spring Water",
-      type: "spring",
-      size: "500ml",
-      price: 1.99,
-      image:
-        "https://images.pexels.com/photos/1000084/pexels-photo-1000084.jpeg?auto=compress&cs=tinysrgb&w=400&h=400&fit=crop",
-      rating: 4.8,
-      reviews: 234,
-      description: "Pure spring water from pristine mountain sources",
-    },
-    {
-      id: 2,
-      name: "AquaNest Sparkling",
-      type: "sparkling",
-      size: "500ml",
-      price: 2.49,
-      image:
-        "https://images.pexels.com/photos/2659475/pexels-photo-2659475.jpeg?auto=compress&cs=tinysrgb&w=400&h=400&fit=crop",
-      rating: 4.7,
-      reviews: 189,
-      description: "Refreshing sparkling water with natural bubbles",
-    },
-    {
-      id: 3,
-      name: "AquaNest Alkaline",
-      type: "alkaline",
-      size: "1L",
-      price: 3.99,
-      image:
-        "https://images.pexels.com/photos/416528/pexels-photo-416528.jpeg?auto=compress&cs=tinysrgb&w=400&h=400&fit=crop",
-      rating: 4.9,
-      reviews: 156,
-      description: "pH balanced alkaline water for optimal hydration",
-    },
-    {
-      id: 4,
-      name: "AquaNest Family Pack",
-      type: "spring",
-      size: "5L",
-      price: 12.99,
-      image:
-        "https://images.pexels.com/photos/3962285/pexels-photo-3962285.jpeg?auto=compress&cs=tinysrgb&w=400&h=400&fit=crop",
-      rating: 4.8,
-      reviews: 298,
-      description: "Perfect for families - 5L premium spring water",
-    },
-    {
-      id: 5,
-      name: "AquaNest Sparkling Lime",
-      type: "sparkling",
-      size: "330ml",
-      price: 2.29,
-      image:
-        "https://images.pexels.com/photos/2659475/pexels-photo-2659475.jpeg?auto=compress&cs=tinysrgb&w=400&h=400&fit=crop",
-      rating: 4.6,
-      reviews: 145,
-      description: "Sparkling water with natural lime flavor",
-    },
-    {
-      id: 6,
-      name: "AquaNest Alkaline Plus",
-      type: "alkaline",
-      size: "500ml",
-      price: 2.99,
-      image:
-        "https://images.pexels.com/photos/416528/pexels-photo-416528.jpeg?auto=compress&cs=tinysrgb&w=400&h=400&fit=crop",
-      rating: 5.0,
-      reviews: 89,
-      description: "Enhanced alkaline water with electrolytes",
-    },
-  ];
-
+  useEffect(() => {
+    const fetchProducts = async () => {
+      try {
+        const response = await axios.get(`${BACK_END_LINK}/api/products`);
+        setProducts(response.data);
+      } catch (error) {
+        console.error("Failed to fetch products:", error);
+      }
+    };
+    fetchProducts();
+  }, []);
+  console.log(products);
   const filteredProducts = products
     .filter(
-      (product) => selectedType === "all" || product.type === selectedType
+      (product) => selectedType === "all" || product.category === selectedType
     )
     .filter(
       (product) => selectedSize === "all" || product.size === selectedSize
@@ -100,7 +53,7 @@ const Products = () => {
         case "price-high":
           return b.price - a.price;
         case "rating":
-          return b.rating - a.rating;
+          return b.ratings - a.ratings;
         default:
           return a.name.localeCompare(b.name);
       }
@@ -239,7 +192,7 @@ const Products = () => {
       <section className="py-16">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <AnimatePresence mode="wait">
-            {filteredProducts.length > 0 ? (
+            {products.length > 0 && filteredProducts.length > 0 ? (
               <motion.div
                 className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8"
                 variants={containerVariants}
@@ -249,7 +202,7 @@ const Products = () => {
               >
                 {filteredProducts.map((product, index) => (
                   <motion.div
-                    key={product.id}
+                    key={product._id}
                     className="group bg-white rounded-2xl shadow-lg overflow-hidden hover:shadow-xl transition-all duration-300"
                     variants={itemVariants}
                     whileHover={{
@@ -260,7 +213,7 @@ const Products = () => {
                   >
                     <div className="relative overflow-hidden">
                       <motion.img
-                        src={product.image}
+                        src={product.imageUrl}
                         alt={product.name}
                         className="w-full h-64 object-cover"
                         whileHover={{ scale: 1.1 }}
@@ -284,7 +237,7 @@ const Products = () => {
                           className="text-2xl font-bold text-blue-600"
                           whileHover={{ scale: 1.1 }}
                         >
-                          ${product.price}
+                          Rs {product.price}
                         </motion.span>
                       </div>
 
@@ -303,7 +256,7 @@ const Products = () => {
                             >
                               <Star
                                 className={`h-4 w-4 ${
-                                  i < Math.floor(product.rating)
+                                  i < Math.floor(product.ratings)
                                     ? "text-yellow-400 fill-current"
                                     : "text-gray-300"
                                 }`}
@@ -312,7 +265,7 @@ const Products = () => {
                           ))}
                         </div>
                         <span className="text-sm text-gray-600 ml-2">
-                          {product.rating} ({product.reviews} reviews)
+                          {product.ratings} ({product.reviews} reviews)
                         </span>
                       </div>
 
@@ -325,6 +278,16 @@ const Products = () => {
                             {product.size}
                           </span>
                         </motion.div>
+
+                        <motion.div
+                          className="text-sm text-gray-500"
+                          whileHover={{ scale: 1.05 }}
+                        >
+                          <span className="bg-gray-100 px-3 py-1 rounded-full">
+                            Available {product.stock}
+                          </span>
+                        </motion.div>
+
                         <motion.button
                           className="group bg-blue-600 text-white px-6 py-2 rounded-full hover:bg-blue-700 transition-colors duration-300 flex items-center space-x-2"
                           whileHover={{ scale: 1.05 }}
@@ -391,32 +354,39 @@ const Products = () => {
             {[
               {
                 name: "Spring Water",
+                category: "spring",
                 description:
                   "Pure, natural spring water from protected sources",
                 image:
                   "https://images.pexels.com/photos/1000084/pexels-photo-1000084.jpeg?auto=compress&cs=tinysrgb&w=600&h=400&fit=crop",
-                products: products.filter((p) => p.type === "spring").length,
+                products: products.filter((p) => p.category === "spring")
+                  .length,
               },
               {
                 name: "Sparkling Water",
+                category: "sparkling",
                 description: "Refreshing sparkling water with natural bubbles",
                 image:
                   "https://images.pexels.com/photos/2659475/pexels-photo-2659475.jpeg?auto=compress&cs=tinysrgb&w=600&h=400&fit=crop",
-                products: products.filter((p) => p.type === "sparkling").length,
+                products: products.filter((p) => p.category === "sparkling")
+                  .length,
               },
               {
                 name: "Alkaline Water",
+                category: "alkaline",
                 description: "pH balanced alkaline water for optimal health",
                 image:
                   "https://images.pexels.com/photos/416528/pexels-photo-416528.jpeg?auto=compress&cs=tinysrgb&w=600&h=400&fit=crop",
-                products: products.filter((p) => p.type === "alkaline").length,
+                products: products.filter((p) => p.category === "alkaline")
+                  .length,
               },
             ].map((category, index) => (
               <motion.div
                 key={index}
-                className="group bg-white rounded-2xl overflow-hidden shadow-lg hover:shadow-xl transition-all duration-300"
+                className="group bg-white rounded-2xl overflow-hidden shadow-lg hover:shadow-xl transition-all duration-300 cursor-pointer"
                 variants={itemVariants}
                 whileHover={{ y: -10 }}
+                onClick={() => setSelectedType(category.category)} // ← This line enables filtering
               >
                 <div className="relative overflow-hidden">
                   <motion.img
@@ -426,7 +396,7 @@ const Products = () => {
                     whileHover={{ scale: 1.1 }}
                     transition={{ duration: 0.6 }}
                   />
-                  <div className="absolute inset-0 bg-black bg-opacity-20 group-hover:bg-opacity-30 transition-all duration-300"></div>
+                  <div className="absolute inset-0 bg-black bg-opacity-20 group-hover:bg-opacity-30 transition-all duration-300" />
                   <div className="absolute bottom-4 left-4 text-white">
                     <h3 className="text-xl font-bold mb-1">{category.name}</h3>
                     <p className="text-sm opacity-90">

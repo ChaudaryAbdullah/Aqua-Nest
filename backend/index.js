@@ -7,13 +7,14 @@ import cors from "cors";
 import http from "http";
 import user from "./routes/userRoutes.js";
 import profile from "./routes/profileRoutes.js";
+import product from "./routes/productRoutes.js";
 
 const app = express();
 const server = http.createServer(app);
 
 app.use(
   cors({
-    origin: "*",
+    origin: FRONTEND_URL,
     credentials: true,
     methods: ["GET", "POST", "PUT", "DELETE"],
     allowedHeaders: ["Content-Type"],
@@ -24,6 +25,7 @@ app.use(express.json());
 
 app.use("/api/users", user);
 app.use("/api/profile", profile);
+app.use("/api/products", product);
 
 // Routes
 

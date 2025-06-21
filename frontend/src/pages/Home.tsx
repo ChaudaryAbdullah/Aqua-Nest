@@ -156,7 +156,7 @@ const Home = () => {
               >
                 <Link
                   to="/products"
-                  className="group bg-white text-blue-600 px-8 py-4 rounded-full font-semibold text-lg shadow-lg flex items-center space-x-2"
+                  className="group bg-white text-blue-600 px-8 py-4 rounded-full font-semibold text-lg shadow-lg flex items-center space-x-2 mb-4 sm:mb-0"
                 >
                   <span>Order Now</span>
                   <motion.div
@@ -190,7 +190,7 @@ const Home = () => {
           animate={{ y: [0, 10, 0] }}
           transition={{ duration: 2, repeat: Infinity }}
         >
-          <div className="w-6 h-10 border-2 border-white rounded-full flex justify-center">
+          <div className="w-6 h-10 border-2 border-white rounded-full flex justify-center mx-auto mt-0 sm:mt-0 mt-[4px]">
             <motion.div
               className="w-1 h-3 bg-white rounded-full mt-2"
               animate={{ opacity: [1, 0, 1] }}
