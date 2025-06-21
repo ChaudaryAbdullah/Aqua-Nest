@@ -43,14 +43,15 @@ router.get("/", async (req, res) => {
 
 router.get("/:userName", async (req, res) => {
   try {
-    const User = await User.findOne({
+    console.log("Fetching user:", req.params.userName);
+    const user = await User.findOne({
       userName: req.params.userName,
     });
-
-    if (!User) {
+    console.log("User found:", user);
+    if (!user) {
       return res.status(404).send({ message: "User not found" });
     }
-    return res.status(200).send(User);
+    return res.status(200).send(user);
   } catch (err) {
     return res.status(500).send({ message: err.message });
   }

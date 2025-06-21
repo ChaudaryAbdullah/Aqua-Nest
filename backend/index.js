@@ -8,7 +8,7 @@ import http from "http";
 import user from "./routes/userRoutes.js";
 import profile from "./routes/profileRoutes.js";
 import product from "./routes/productRoutes.js";
-
+import order from "./routes/orderRoutes.js";
 const app = express();
 const server = http.createServer(app);
 
@@ -26,6 +26,7 @@ app.use(express.json());
 app.use("/api/users", user);
 app.use("/api/profile", profile);
 app.use("/api/products", product);
+app.use("/api/orders", order);
 
 // Routes
 

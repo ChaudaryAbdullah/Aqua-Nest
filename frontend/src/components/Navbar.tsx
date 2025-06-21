@@ -42,7 +42,12 @@ const Navbar = () => {
   };
 
   const handleViewHistory = () => {
-    navigate("/history");
+    navigate("/order#history");
+    setIsDropdownOpen(false);
+  };
+
+  const handleViewOrder = () => {
+    navigate("/order");
     setIsDropdownOpen(false);
   };
 
@@ -163,6 +168,12 @@ const Navbar = () => {
             </button>
             {isDropdownOpen && (
               <div className="absolute right-0 mt-2 w-40 bg-white border rounded-md shadow-md z-50">
+                <button
+                  onClick={handleViewOrder}
+                  className="block w-full px-4 py-2 text-left hover:bg-gray-100"
+                >
+                  View Order
+                </button>
                 <button
                   onClick={handleViewHistory}
                   className="block w-full px-4 py-2 text-left hover:bg-gray-100"

@@ -15,7 +15,8 @@ import Testimonials from "./pages/Testimonials";
 import Contact from "./pages/Contact";
 import LoginForm from "./pages/Login";
 import SignUp from "./pages/SignUp";
-
+import Payment from "./pages/Payment";
+import Orders from "./pages/Orders";
 const AnimatedRoutes = () => {
   const location = useLocation();
 
@@ -29,6 +30,8 @@ const AnimatedRoutes = () => {
         <Route path="/contact" element={<Contact />} />
         <Route path="/login" element={<LoginForm />} />
         <Route path="/signup" element={<SignUp />} />
+        <Route path="/payment" element={<Payment />} />
+        <Route path="/order" element={<Orders />} />
       </Routes>
     </AnimatePresence>
   );

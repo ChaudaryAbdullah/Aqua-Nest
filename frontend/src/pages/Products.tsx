@@ -39,6 +39,10 @@ const Products = () => {
   }, [location]);
 
   useEffect(() => {
+    localStorage.setItem("cart", JSON.stringify(cart));
+  }, [cart]);
+
+  useEffect(() => {
     const handleClickOutside = (event: MouseEvent) => {
       if (cartRef.current && !cartRef.current.contains(event.target as Node)) {
         setShowCart(false);
@@ -502,7 +506,12 @@ const Products = () => {
                     >
                       Close
                     </button>
-                    <button className="bg-green-600 text-white px-4 py-2 rounded-lg hover:bg-green-700 transition">
+                    <button
+                      className="bg-green-600 text-white px-4 py-2 rounded-lg hover:bg-green-700 transition"
+                      onClick={() => {
+                        navigate("/payment");
+                      }}
+                    >
                       Proceed to Payment
                     </button>
                   </div>
