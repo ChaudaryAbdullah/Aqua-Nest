@@ -1,5 +1,5 @@
 import React, { useState } from "react";
-import { useNavigate } from "react-router-dom";
+import { Link, useNavigate } from "react-router-dom";
 import { ToastContainer, toast } from "react-toastify";
 import { BACK_END_LINK } from "../config";
 const LoginForm = () => {
@@ -92,9 +92,9 @@ const LoginForm = () => {
 
         <div className="text-sm text-gray-600 mb-4">
           Don't have an account?{" "}
-          <a href="/signup" className="text-blue-600 hover:underline">
+          <Link to="/signup" className="text-blue-600 hover:underline">
             Create One
-          </a>
+          </Link>
         </div>
 
         <div className="flex items-center my-4">
