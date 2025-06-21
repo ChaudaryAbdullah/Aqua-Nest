@@ -129,7 +129,9 @@ const Orders = () => {
                   <div className="text-sm text-gray-600">
                     {order.products.map((item, i) => (
                       <p key={i}>
-                        {item.product.name} × {item.quantity}
+                        {item.product
+                          ? `${item.product.name} × ${item.quantity}`
+                          : "Product unavailable"}
                       </p>
                     ))}
                   </div>

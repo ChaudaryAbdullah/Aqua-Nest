@@ -2,22 +2,41 @@ import React, { useState, useEffect, useRef } from "react";
 import { Link, useLocation, useNavigate } from "react-router-dom";
 import { motion, AnimatePresence } from "framer-motion";
 import { Menu, X, Droplets, Phone } from "lucide-react";
+import axios from "axios";
+import { BACK_END_LINK } from "../config";
 
 const Navbar = () => {
   const navigate = useNavigate();
   const location = useLocation();
   const dropdownRef = useRef<HTMLDivElement>(null);
-
+  const [isAdmin, setIsAdmin] = useState(false);
   const [isOpen, setIsOpen] = useState(false);
   const [isDropdownOpen, setIsDropdownOpen] = useState(false);
   const [isScrolled, setIsScrolled] = useState(false);
   const [isLoggedIn, setIsLoggedIn] = useState(false);
 
+  // Update login status on route change
   useEffect(() => {
-    const username = localStorage.getItem("data");
-    setIsLoggedIn(!!username);
+    const userId = localStorage.getItem("data");
+    setIsLoggedIn(!!userId);
   }, [location]);
 
+  // Re-check admin status when login state or route changes
+  useEffect(() => {
+    const userId = localStorage.getItem("data");
+
+    if (!userId) {
+      setIsAdmin(false); // reset if no user
+      return;
+    }
+
+    axios
+      .get(`${BACK_END_LINK}/api/users/${userId}`)
+      .then((res) => setIsAdmin(!!res.data.isAdmin))
+      .catch(() => setIsAdmin(false));
+  }, [isLoggedIn, location]);
+
+  // Scroll effect
   useEffect(() => {
     const handleScroll = () => {
       setIsScrolled(window.scrollY > 20);
@@ -51,13 +70,18 @@ const Navbar = () => {
     setIsDropdownOpen(false);
   };
 
+  const handleViewAdmin = () => {
+    navigate("/admin");
+    setIsDropdownOpen(false);
+  };
+
   const navLinks = [
     { name: "Home", path: "/" },
     { name: "About", path: "/about" },
-    { name: "Products", path: "/products" },
+    !isAdmin && { name: "Products", path: "/products" },
     { name: "Testimonials", path: "/testimonials" },
     { name: "Contact", path: "/contact" },
-  ];
+  ].filter(Boolean); // removes falsy (like false or null)
 
   return (
     <motion.nav
@@ -154,7 +178,7 @@ const Navbar = () => {
             </span>
           </motion.div>
 
-          {/* Profile Button - Desktop */}
+          {/* Profile Button */}
           <div className="hidden md:block relative" ref={dropdownRef}>
             <button
               onClick={handleProfileClick}
@@ -166,20 +190,32 @@ const Navbar = () => {
             >
               Profile
             </button>
+
             {isDropdownOpen && (
               <div className="absolute right-0 mt-2 w-40 bg-white border rounded-md shadow-md z-50">
-                <button
-                  onClick={handleViewOrder}
-                  className="block w-full px-4 py-2 text-left hover:bg-gray-100"
-                >
-                  View Order
-                </button>
-                <button
-                  onClick={handleViewHistory}
-                  className="block w-full px-4 py-2 text-left hover:bg-gray-100"
-                >
-                  View History
-                </button>
+                {isAdmin ? (
+                  <button
+                    onClick={handleViewAdmin}
+                    className="block w-full px-4 py-2 text-left hover:bg-gray-100"
+                  >
+                    Admin Dashboard
+                  </button>
+                ) : (
+                  <>
+                    <button
+                      onClick={handleViewOrder}
+                      className="block w-full px-4 py-2 text-left hover:bg-gray-100"
+                    >
+                      View Order
+                    </button>
+                    <button
+                      onClick={handleViewHistory}
+                      className="block w-full px-4 py-2 text-left hover:bg-gray-100"
+                    >
+                      View History
+                    </button>
+                  </>
+                )}
                 <button
                   onClick={handleSignOut}
                   className="block w-full px-4 py-2 text-left hover:bg-gray-100 text-red-500"
@@ -223,66 +259,6 @@ const Navbar = () => {
             </AnimatePresence>
           </motion.button>
         </div>
-
-        {/* Mobile Nav Panel */}
-        <AnimatePresence>
-          {isOpen && (
-            <motion.div
-              className="md:hidden mt-4 pb-4 border-t border-gray-200"
-              initial={{ opacity: 0, height: 0 }}
-              animate={{ opacity: 1, height: "auto" }}
-              exit={{ opacity: 0, height: 0 }}
-              transition={{ duration: 0.3 }}
-            >
-              {navLinks.map((link, index) => (
-                <motion.div
-                  key={link.name}
-                  initial={{ opacity: 0, x: -20 }}
-                  animate={{ opacity: 1, x: 0 }}
-                  transition={{ delay: index * 0.1 }}
-                >
-                  <Link
-                    to={link.path}
-                    onClick={() => setIsOpen(false)}
-                    className={`block py-2 px-3 rounded-md text-base font-medium ${
-                      location.pathname === link.path
-                        ? "text-blue-600 bg-blue-50"
-                        : "text-gray-700 hover:text-blue-600 hover:bg-gray-50"
-                    }`}
-                  >
-                    {link.name}
-                  </Link>
-                </motion.div>
-              ))}
-
-              {/* Mobile Profile */}
-              <div className="mt-4 px-4">
-                <button
-                  onClick={handleProfileClick}
-                  className="w-full bg-blue-600 text-white px-4 py-2 rounded-md hover:bg-blue-700 transition"
-                >
-                  Profile
-                </button>
-                {isDropdownOpen && (
-                  <div className="mt-2 w-full bg-white border rounded-md shadow-md">
-                    <button
-                      onClick={handleViewHistory}
-                      className="block w-full px-4 py-2 text-left hover:bg-gray-100"
-                    >
-                      View History
-                    </button>
-                    <button
-                      onClick={handleSignOut}
-                      className="block w-full px-4 py-2 text-left hover:bg-gray-100 text-red-500"
-                    >
-                      Sign Out
-                    </button>
-                  </div>
-                )}
-              </div>
-            </motion.div>
-          )}
-        </AnimatePresence>
       </div>
     </motion.nav>
   );

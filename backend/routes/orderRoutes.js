@@ -1,5 +1,6 @@
 import express from "express";
 import { Order } from "../models/orderModel.js";
+import { isAdmin } from "../middleWare/isAdmin.js";
 
 const router = express.Router();
 
@@ -41,4 +42,31 @@ router.get("/user/:userId", async (req, res) => {
   }
 });
 
+router.get("/", async (req, res) => {
+  try {
+    const orders = await Order.find().populate("products.product");
+    res.status(200).json(orders);
+  } catch (err) {
+    res.status(500).json({ message: "Failed to fetch orders" });
+  }
+});
+
+router.put("/:id/status", isAdmin, async (req, res) => {
+  console.log(req.params);
+  const { id } = req.params;
+  const { status } = req.body;
+
+  try {
+    console.log(id);
+    const order = await Order.findById(id);
+    if (!order) return res.status(404).json({ message: "Order not found" });
+
+    order.status = status;
+    await order.save();
+
+    res.status(200).json({ message: "Status updated", order });
+  } catch (err) {
+    res.status(500).json({ message: "Server error", error: err.message });
+  }
+});
 export default router;

@@ -9,6 +9,7 @@ import user from "./routes/userRoutes.js";
 import profile from "./routes/profileRoutes.js";
 import product from "./routes/productRoutes.js";
 import order from "./routes/orderRoutes.js";
+
 const app = express();
 const server = http.createServer(app);
 
@@ -17,18 +18,17 @@ app.use(
     origin: FRONTEND_URL,
     credentials: true,
     methods: ["GET", "POST", "PUT", "DELETE"],
-    allowedHeaders: ["Content-Type"],
+    allowedHeaders: ["Content-Type", "userId"],
   })
 );
 
 app.use(express.json());
 
+// Routes
 app.use("/api/users", user);
 app.use("/api/profile", profile);
 app.use("/api/products", product);
 app.use("/api/orders", order);
-
-// Routes
 
 app.get("/", (req, res) => {
   res.send("Welcome to the Aqua Nest API!");

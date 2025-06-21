@@ -93,7 +93,7 @@ const Payment = () => {
       });
 
       localStorage.removeItem("cart");
-      navigate("/orders"); // or redirect to /orders or a success page
+      navigate("/order"); // or redirect to /orders or a success page
     } catch (error) {
       console.error("Order creation failed", error);
       toast.error("Order failed. Please try again.", {
