@@ -1,4 +1,5 @@
-import React, { useEffect, useState } from "react";
+import React, { useEffect, useState, useRef } from "react";
+import { useNavigate } from "react-router-dom";
 import { motion, AnimatePresence } from "framer-motion";
 import { Filter, Star, ShoppingCart, Droplets, Search } from "lucide-react";
 import axios from "axios";
@@ -18,11 +19,40 @@ type Product = {
 };
 
 const Products = () => {
+  const navigate = useNavigate();
   const [selectedType, setSelectedType] = useState("all");
   const [selectedSize, setSelectedSize] = useState("all");
   const [sortBy, setSortBy] = useState("name");
   const [searchTerm, setSearchTerm] = useState("");
   const [products, setProducts] = useState<Product[]>([]);
+  const [cart, setCart] = useState<{
+    [id: string]: { product: Product; quantity: number };
+  }>({});
+  const [quantities, setQuantities] = useState<{ [id: string]: number }>({});
+  const [showCart, setShowCart] = useState(false);
+  const [isLoggedIn, setIsLoggedIn] = useState(false);
+  const cartRef = useRef<HTMLDivElement>(null);
+
+  useEffect(() => {
+    const username = localStorage.getItem("data");
+    setIsLoggedIn(!!username);
+  }, [location]);
+
+  useEffect(() => {
+    const handleClickOutside = (event: MouseEvent) => {
+      if (cartRef.current && !cartRef.current.contains(event.target as Node)) {
+        setShowCart(false);
+      }
+    };
+
+    if (showCart) {
+      document.addEventListener("mousedown", handleClickOutside);
+    }
+
+    return () => {
+      document.removeEventListener("mousedown", handleClickOutside);
+    };
+  }, [showCart]);
 
   useEffect(() => {
     const fetchProducts = async () => {
@@ -116,6 +146,30 @@ const Products = () => {
           </motion.div>
         </div>
       </section>
+
+      {/* Cart icon */}
+      <div className="fixed top-20 right-6 z-50">
+        <button
+          onClick={() => {
+            if (!isLoggedIn) {
+              navigate("/login");
+            } else {
+              setShowCart(true);
+            }
+          }}
+          className="relative bg-white p-3 rounded-full shadow-md hover:shadow-lg transition"
+        >
+          <ShoppingCart className="h-6 w-6 text-blue-600" />
+          {Object.keys(cart).length > 0 && (
+            <span className="absolute top-0 right-0 text-xs bg-red-500 text-white rounded-full px-1">
+              {Object.values(cart).reduce(
+                (acc, item) => acc + item.quantity,
+                0
+              )}
+            </span>
+          )}
+        </button>
+      </div>
 
       {/* Search and Filters */}
       <section className="py-8 bg-white border-b sticky top-24 z-40 backdrop-blur-md bg-white/95">
@@ -267,6 +321,42 @@ const Products = () => {
                         <span className="text-sm text-gray-600 ml-2">
                           {product.ratings} ({product.reviews} reviews)
                         </span>
+                        <div
+                          style={{ marginLeft: "2rem" }}
+                          className="flex items-right justify-between mt-4 space-x-4"
+                        >
+                          {/* Quantity Selector */}
+                          <div className="flex items-center space-x-2">
+                            <button
+                              onClick={() =>
+                                setQuantities((prev) => ({
+                                  ...prev,
+                                  [product._id]: Math.max(
+                                    1,
+                                    (prev[product._id] || 1) - 1
+                                  ),
+                                }))
+                              }
+                              className="px-3 py-1 rounded-full bg-gray-200 hover:bg-gray-300 text-gray-700 font-bold"
+                            >
+                              -
+                            </button>
+                            <span className="text-lg font-semibold">
+                              {quantities[product._id] || 1}
+                            </span>
+                            <button
+                              onClick={() =>
+                                setQuantities((prev) => ({
+                                  ...prev,
+                                  [product._id]: (prev[product._id] || 1) + 1,
+                                }))
+                              }
+                              className="px-3 py-1 rounded-full bg-gray-200 hover:bg-gray-300 text-gray-700 font-bold"
+                            >
+                              +
+                            </button>
+                          </div>
+                        </div>
                       </div>
 
                       <div className="flex items-center justify-between">
@@ -289,6 +379,21 @@ const Products = () => {
                         </motion.div>
 
                         <motion.button
+                          onClick={() => {
+                            if (!isLoggedIn) {
+                              navigate("/login");
+                              return;
+                            }
+                            const qty = quantities[product._id] || 1;
+                            setCart((prev) => ({
+                              ...prev,
+                              [product._id]: {
+                                product,
+                                quantity:
+                                  (prev[product._id]?.quantity || 0) + qty,
+                              },
+                            }));
+                          }}
                           className="group bg-blue-600 text-white px-6 py-2 rounded-full hover:bg-blue-700 transition-colors duration-300 flex items-center space-x-2"
                           whileHover={{ scale: 1.05 }}
                           whileTap={{ scale: 0.95 }}
@@ -317,7 +422,7 @@ const Products = () => {
                 <h3 className="text-xl font-semibold text-gray-600 mb-2">
                   No products found
                 </h3>
-                <p className="text-gray-500">
+                <p className="text-white">
                   Try adjusting your filters to see more products.
                 </p>
               </motion.div>
@@ -325,6 +430,88 @@ const Products = () => {
           </AnimatePresence>
         </div>
       </section>
+      {/* cart pop */}
+      <AnimatePresence>
+        {showCart && (
+          <motion.div
+            className="fixed inset-0 bg-black/30 flex items-center justify-center z-50"
+            initial={{ opacity: 0 }}
+            animate={{ opacity: 1 }}
+            exit={{ opacity: 0 }}
+          >
+            <motion.div
+              ref={cartRef}
+              className="bg-white p-6 rounded-xl max-w-md w-full shadow-xl"
+              initial={{ scale: 0.8 }}
+              animate={{ scale: 1 }}
+              exit={{ scale: 0.8 }}
+            >
+              <h2 className="text-xl font-bold mb-4">Your Cart</h2>
+              {Object.keys(cart).length === 0 ? (
+                <p className="text-gray-600">Your cart is empty.</p>
+              ) : (
+                <>
+                  <ul className="space-y-4 mb-4">
+                    {Object.entries(cart).map(
+                      ([productId, { product, quantity }]) => (
+                        <li
+                          key={product._id}
+                          className="flex justify-between items-center gap-4"
+                        >
+                          <div className="flex-1">
+                            <h4 className="font-semibold">{product.name}</h4>
+                            <p className="text-sm text-gray-500">
+                              {quantity} × Rs {product.price}
+                            </p>
+                          </div>
+
+                          <span className="font-bold">
+                            Rs {quantity * product.price}
+                          </span>
+
+                          <button
+                            onClick={() => {
+                              const updatedCart = { ...cart };
+                              delete updatedCart[productId];
+                              setCart(updatedCart);
+                            }}
+                            className="ml-2 text-sm text-red-600 hover:underline"
+                          >
+                            Remove
+                          </button>
+                        </li>
+                      )
+                    )}
+                  </ul>
+
+                  <div className="flex justify-between items-center font-semibold mb-4">
+                    <span>Total</span>
+                    <span>
+                      Rs{" "}
+                      {Object.values(cart).reduce(
+                        (total, { product, quantity }) =>
+                          total + product.price * quantity,
+                        0
+                      )}
+                    </span>
+                  </div>
+                  <div className="flex justify-between">
+                    <button
+                      onClick={() => setShowCart(false)}
+                      className="text-gray-600 hover:underline"
+                    >
+                      Close
+                    </button>
+                    <button className="bg-green-600 text-white px-4 py-2 rounded-lg hover:bg-green-700 transition">
+                      Proceed to Payment
+                    </button>
+                  </div>
+                </>
+              )}
+            </motion.div>
+          </motion.div>
+        )}
+      </AnimatePresence>
 
       {/* Featured Categories */}
       <section className="py-16 bg-gray-50 overflow-hidden">
