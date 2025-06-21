@@ -259,6 +259,90 @@ const Navbar = () => {
             </AnimatePresence>
           </motion.button>
         </div>
+        {/* Mobile Dropdown Menu */}
+        <AnimatePresence>
+          {isOpen && (
+            <motion.div
+              key="mobile-menu"
+              initial={{ opacity: 0, y: -10 }}
+              animate={{ opacity: 1, y: 0 }}
+              exit={{ opacity: 0, y: -10 }}
+              transition={{ duration: 0.3 }}
+              className="md:hidden absolute top-full left-0 w-full bg-white shadow-lg z-40"
+            >
+              <div className="flex flex-col items-start px-6 py-4 space-y-3">
+                {navLinks.map((link) => (
+                  <Link
+                    key={link.name}
+                    to={link.path}
+                    className="text-gray-800 hover:text-blue-600 w-full"
+                    onClick={() => setIsOpen(false)}
+                  >
+                    {link.name}
+                  </Link>
+                ))}
+
+                <hr className="w-full border-gray-200" />
+
+                {!isLoggedIn ? (
+                  <button
+                    onClick={() => {
+                      setIsOpen(false);
+                      navigate("/login");
+                    }}
+                    className="w-full text-left text-gray-800 hover:text-blue-600"
+                  >
+                    Login
+                  </button>
+                ) : (
+                  <>
+                    {isAdmin ? (
+                      <button
+                        onClick={() => {
+                          setIsOpen(false);
+                          handleViewAdmin();
+                        }}
+                        className="w-full text-left text-gray-800 hover:text-blue-600"
+                      >
+                        Admin Dashboard
+                      </button>
+                    ) : (
+                      <>
+                        <button
+                          onClick={() => {
+                            setIsOpen(false);
+                            handleViewOrder();
+                          }}
+                          className="w-full text-left text-gray-800 hover:text-blue-600"
+                        >
+                          View Order
+                        </button>
+                        <button
+                          onClick={() => {
+                            setIsOpen(false);
+                            handleViewHistory();
+                          }}
+                          className="w-full text-left text-gray-800 hover:text-blue-600"
+                        >
+                          View History
+                        </button>
+                      </>
+                    )}
+                    <button
+                      onClick={() => {
+                        setIsOpen(false);
+                        handleSignOut();
+                      }}
+                      className="w-full text-left text-red-500 hover:underline"
+                    >
+                      Sign Out
+                    </button>
+                  </>
+                )}
+              </div>
+            </motion.div>
+          )}
+        </AnimatePresence>
       </div>
     </motion.nav>
   );
