@@ -1,4 +1,5 @@
 import React, { useEffect, useState } from "react";
+import { useLocation } from "react-router-dom";
 import axios from "axios";
 import { BACK_END_LINK } from "../config";
 import { motion } from "framer-motion";
@@ -27,6 +28,17 @@ const getProgress = (status: string) => {
 const Orders = () => {
   const [orders, setOrders] = useState<Order[]>([]);
   const [user, setUser] = useState(null);
+
+  const location = useLocation();
+
+  useEffect(() => {
+    if (location.hash === "#history") {
+      const el = document.getElementById("history");
+      if (el) {
+        el.scrollIntoView({ behavior: "smooth" });
+      }
+    }
+  }, [location]);
 
   useEffect(() => {
     const dataString = localStorage.getItem("data");
@@ -129,7 +141,9 @@ const Orders = () => {
 
           {/* Past Orders */}
           <section>
-            <h2 className="text-xl font-semibold mb-4">Order History</h2>
+            <h2 id="history" className="text-xl font-semibold mb-4 history">
+              Order History
+            </h2>
             {pastOrders.length === 0 ? (
               <p className="text-gray-600">No past orders yet.</p>
             ) : (
