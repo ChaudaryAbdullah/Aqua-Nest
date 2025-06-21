@@ -7,7 +7,7 @@ import { motion } from "framer-motion";
 type Order = {
   _id: string;
   status: string;
-  products: { product: { name: string }; quantity: number }[];
+  products: { product: { name: string } | null; quantity: number }[];
   totalAmount: number;
   shippingAddress: {
     address: string;
@@ -27,7 +27,7 @@ const getProgress = (status: string) => {
 
 const Orders = () => {
   const [orders, setOrders] = useState<Order[]>([]);
-  const [user, setUser] = useState(null);
+  const [user, setUser] = useState<any>(null);
 
   const location = useLocation();
 
@@ -46,16 +46,14 @@ const Orders = () => {
 
     const fetchUser = async () => {
       try {
-        console.log(BACK_END_LINK);
         const response = await axios.get(
           `${BACK_END_LINK}/api/users/${userData}`
         );
-        if (!response) {
-          console.error("Something went wrong!");
+        if (response) {
+          setUser(response.data);
+        } else {
+          console.error("Something went wrong fetching user data!");
         }
-
-        setUser(response.data);
-        console.log(response.data);
       } catch (error) {
         console.error(error);
       }
@@ -95,9 +93,54 @@ const Orders = () => {
         <h1 className="text-3xl font-bold mb-6 text-center">My Orders</h1>
       </section>
 
-      {/* Current Orders */}
+      {/* Orders Section */}
       <div className="bg-white/95">
         <div className="max-w-5xl mx-auto py-10 px-4">
+          {/* Current Orders */}
+          <section className="mb-10">
+            <h2 className="text-xl font-semibold mb-4">Current Orders</h2>
+            {currentOrders.length === 0 ? (
+              <p className="text-gray-600">No ongoing orders.</p>
+            ) : (
+              currentOrders.map((order) => (
+                <div
+                  key={order._id}
+                  className="bg-white rounded-2xl shadow-lg p-6 mb-6"
+                >
+                  <div className="flex justify-between mb-3">
+                    <span className="font-medium">Order ID: {order._id}</span>
+                    <span className="text-blue-600 font-medium">
+                      Status: {order.status}
+                    </span>
+                  </div>
+
+                  {/* Progress Bar */}
+                  <div className="relative w-full h-4 bg-gray-200 rounded-full mb-5 overflow-hidden">
+                    <motion.div
+                      className="absolute top-0 left-0 h-full bg-blue-600 rounded-full"
+                      style={{ width: `${getProgress(order.status)}%` }}
+                      initial={{ width: 0 }}
+                      animate={{ width: `${getProgress(order.status)}%` }}
+                      transition={{ duration: 0.5 }}
+                    />
+                  </div>
+
+                  <div className="text-sm text-gray-600">
+                    {order.products.map((item, i) => (
+                      <p key={i}>
+                        {item.product
+                          ? `${item.product.name} × ${item.quantity}`
+                          : "Product unavailable"}
+                      </p>
+                    ))}
+                  </div>
+                  <p className="mt-3 text-sm">Total: Rs {order.totalAmount}</p>
+                </div>
+              ))
+            )}
+          </section>
+
+          {/* Order History */}
           <section>
             <h2 id="history" className="text-xl font-semibold mb-4 history">
               Order History
@@ -123,39 +166,6 @@ const Orders = () => {
                         {item.product
                           ? `${item.product.name} × ${item.quantity}`
                           : "Product unavailable"}
-                      </p>
-                    ))}
-                  </div>
-                  <p className="mt-2 text-sm">Total: Rs {order.totalAmount}</p>
-                </div>
-              ))
-            )}
-          </section>
-
-          {/* Past Orders */}
-          <section>
-            <h2 id="history" className="text-xl font-semibold mb-4 history">
-              Order History
-            </h2>
-            {pastOrders.length === 0 ? (
-              <p className="text-gray-600">No past orders yet.</p>
-            ) : (
-              pastOrders.map((order) => (
-                <div
-                  key={order._id}
-                  className="bg-gray-50 rounded shadow p-4 mb-4"
-                >
-                  <div className="flex justify-between">
-                    <span className="font-medium">Order ID: {order._id}</span>
-                    <span className="text-green-600 font-medium">
-                      Delivered on{" "}
-                      {new Date(order.createdAt).toLocaleDateString()}
-                    </span>
-                  </div>
-                  <div className="text-sm text-gray-700 mt-2">
-                    {order.products.map((item, i) => (
-                      <p key={i}>
-                        {item.product.name} × {item.quantity}
                       </p>
                     ))}
                   </div>
